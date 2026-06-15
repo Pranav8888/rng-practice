@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Carnatic Practice Board</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 550px; width: 100%; margin-bottom: 20px; }
+        h1 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .item { margin: 12px 0; padding: 12px; border-left: 5px solid #3498db; background: #f8f9fa; border-radius: 0 8px 8px 0; }
+        .label { font-weight: bold; color: #7f8c8d; font-size: 0.85em; text-transform: uppercase; }
+        .value { font-size: 1.1em; color: #2c3e50; font-weight: 500; }
+        .controls { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #eee; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; }
+        button { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: #3498db; color: white; width: 100%; margin-bottom: 15px; }
+        .btn-add { background: #2ecc71; color: white; width: 100%; }
+        .btn-remove { background: #e74c3c; color: white; }
+        button:hover { opacity: 0.9; }
+        h3 { color: #34495e; font-size: 1.1em; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class='card'>
+        <h1>Daily Practice</h1>
+        <div id='practice-display'>
+            <div class='item'><span class='label'>Warmup Raga</span><br><span class='value' id='warmup'></span></div>
+            <div class='item'><span class='label'>Geetham</span><br><span class='value' id='geetham'></span></div>
+            <div class='item'><span class='label'>Swarajathi</span><br><span class='value' id='swarajathi'></span></div>
+            <div class='item'><span class='label'>Varnam</span><br><span class='value' id='varnam'></span></div>
+            <div class='item'><span class='label'>Main Krithi</span><br><span class='value' id='main'></span></div>
+        </div>
+
+        <button class='btn-primary' onclick='generatePractice()'>Refresh Selection ↻</button>
+
+        <div class='controls'>
+            <h3>Manage Repertoire</h3>
+            <div class='input-group'>
+                <select id='add-cat'>
+                    <option value='main'>Main Krithi</option>
+                    <option value='geethams'>Geetham</option>
+                    <option value='swarajathis'>Swarajathi</option>
+                    <option value='varnams'>Varnam</option>
+                </select>
+                <input type='text' id='add-name' placeholder='Song Name'>
+                <input type='text' id='add-raga' placeholder='Raga'>
+            </div>
+            <button class='btn-add' onclick='addSong()'>Add Song +</button>
+
+            <div class='input-group' style='margin-top:20px;'>
+                <input type='text' id='remove-name' placeholder='Song name to remove'>
+                <button class='btn-remove' onclick='removeSong()'>Remove -</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let songs = [{"song_name": "Vathapi Ganapathim", "raga": "Hamsadhvani"}, {"song_name": "Mooladhara Moorthe", "raga": "Hamsadhvani"}, {"song_name": "Himadri Suthe", "raga": "Kalyani"}, {"song_name": "Kamakshi Kamakoti", "raga": "Simhendramadhyamam"}, {"song_name": "Ada Modi Galade", "raga": "Charukesi"}, {"song_name": "Marugelara", "raga": "Jayantasri"}, {"song_name": "Pakkala Nilabadi", "raga": "Kharaharapriya"}, {"song_name": "Bantureethi", "raga": "Hamsanadam"}, {"song_name": "Mamava Sada Varade", "raga": "Natakurinji"}, {"song_name": "Mamava Sada Janani", "raga": "Kanada"}, {"song_name": "Shree Ranganatham", "raga": "Purnachandrika"}, {"song_name": "Sarasa Mukhi", "raga": "Gaudamalhar"}, {"song_name": "Nagumomu Ganaleni", "raga": "Abheri"}, {"song_name": "Shobillu", "raga": "Jaganmohini"}, {"song_name": "Giriraja Sutha", "raga": "Bangala"}, {"song_name": "Kalaharana Melarahare", "raga": "Suddha Saveri"}, {"song_name": "Shri Guru Guha", "raga": "Devakriya (Suddha Saveri)"}, {"song_name": "Samaja Vara Gamana", "raga": "Hindolam"}, {"song_name": "Jagadananda Karaka", "raga": "Nattai"}, {"song_name": "Maha Ganapathim", "raga": "Nattai"}, {"song_name": "Ninne Nammithe", "raga": "Simhendramadhyamam"}, {"song_name": "Raghuvamshasada", "raga": "Kathanakuthuhalam"}, {"song_name": "Kurai Ondrum Illai", "raga": "Ragamalika"}, {"song_name": "Enna Tavam Saidhane", "raga": "Kapi"}, {"song_name": "Sadhinchane", "raga": "Arabhi"}, {"song_name": "Entaro Mahanubavulu", "raga": "Sri"}, {"song_name": "Manavyalakincara", "raga": "Nalinakanti"}, {"song_name": "Mokshamu Galadha", "raga": "Saramati"}, {"song_name": "Devi Neeye Thunai", "raga": "Keeravani"}, {"song_name": "Sri Valli Devasenapathe", "raga": "Natabhairavi"}, {"song_name": "Sabhapathiku", "raga": "Abhogi"}, {"song_name": "Prabho Ganapathe", "raga": "Tilang"}, {"song_name": "Swaminatha Paripalaya", "raga": "Nattai"}, {"song_name": "Brova Bharama", "raga": "Bahudari"}, {"song_name": "Brochevarevarura", "raga": "Khamas"}, {"song_name": "Venkatachala Nilayam", "raga": "Sindhu Bhairavi"}, {"song_name": "Hiranmaiyim Lakshmim", "raga": "Lalitha"}, {"song_name": "Ardhanareeshwaram", "raga": "Kumudakriya"}, {"song_name": "Krishna Nee Begane Baro", "raga": "Yamunakalyani"}, {"song_name": "Kaddanuvariki", "raga": "Todi"}, {"song_name": "Chakkani Raja Margamu", "raga": "Kharaharapriya"}, {"song_name": "Seethamma Mayamma", "raga": "Vasantha"}, {"song_name": "Nidhi Chala Sukhama", "raga": "Kalyani"}, {"song_name": "Kaa Va Va", "raga": "Varali"}, {"song_name": "Gaanamoorthe", "raga": "Ganamurti"}];
+        let rep = {"Mayamalavagowla": {"geethams": ["Sri Gananatha", "Kunda Goura", "Keraya Neeranu", "Padumanabha", "Analekara"], "swarajathis": ["Rara Venu Gopa Bala", "Sambasiva Yanave"], "varnams": ["Sarasuda (Saveri)", "Chalamela (Nattakurinji)", "Ninnukori (Vasantha)", "Sami Ninne (Shree)"]}, "Dheerasankarabharanam": {"geethams": ["Re Re Sri Ramachandra", "Kamala Jadala", "Varaveena (Mohanam)"], "swarajathis": ["Sambasiva Yanave", "Ninnu Kori"], "varnams": ["Sami Ninne", "Ninnukori (Mohanam)", "Era Naapai (Todi)", "Pagavari (Hamsadhwani)"]}, "Kharaharapriya": {"geethams": ["Aravinda Padayugam", "Nowmi Shivam", "Mandara Dhara"], "swarajathis": ["Rave Himagiri Kumari (Todi)", "Sarasuda"], "varnams": ["Chalamela (Darbar)", "Ninnukori (Kharaharapriya)", "Sami Ninne (Sree)", "Inta Modi (Saranga)"]}, "Mechakalyani": {"geethams": ["Kamala Jadala", "Mandara Dhara", "Varaveena"], "swarajathis": ["Balarupa (Anandabhairavi)", "Raveme Maguva"], "varnams": ["Vanajakshi", "Ninnukori (Hamsadhvani)", "Ninnukori (Kalyani)", "Ninnu Kori (Mohanam)"]}, "Harikambhoji": {"geethams": ["Rama Rama Ratnakara", "Janaka Tanaye"], "swarajathis": ["Kamala Sulochana", "Amba Neelayadhakshi"], "varnams": ["Era Naapai (Todi)", "Sami Ninne (Kamas)", "Ninnukori (Mohanam)", "Chalamela (Natakurinji)"]}, "Hanumatodi": {"geethams": ["Gana Vidya", "Mandara Dhara"], "swarajathis": ["Rave Himagiri Kumari", "Kamakshi (Bhairavi)"], "varnams": ["Era Naapai", "Kanakangi (Varnam)", "Ninnu Kori (Dhanyasi)"]}, "Natabhairavi": {"geethams": ["Sri Ramachandra", "Saraswathi Chaye"], "swarajathis": ["Sambasiva Yanave"], "varnams": ["Ninnukori (Abhogi)", "Sami Ninne (Hindolam)", "Chalamela (Darbar)"]}, "Keeravani": {"geethams": ["Varashiva Valamutre", "Minakshi Me Mudam"], "swarajathis": ["Amba Neelayadhakshi"], "varnams": ["Sami Ninne", "Vanajakshi (Varnam)"]}, "Simhendramadhyamam": {"geethams": ["Gananayakaya", "Shakti Sahita"], "swarajathis": ["Kamakshi"], "varnams": ["Ninne Nammiti", "Ninnu Kori"]}, "Kamavardhini": {"geethams": ["Sri Ganapathi", "Shambho Mahadeva"], "swarajathis": ["Rave Himagiri"], "varnams": ["Sami Ninne", "Chalamela"]}, "Shanmukhapriya": {"geethams": ["Sarasiruhasana", "Vighnaraja"], "swarajathis": ["Balarupa"], "varnams": ["Devarani", "Valli Devasenapathe"]}};
+        let simMap = {"Hamsadhvani": "Mechakalyani", "Kalyani": "Mechakalyani", "Yamunakalyani": "Mechakalyani", "Yaman Kalyani": "Mechakalyani", "Nattai": "Chalanata", "Hindolam": "Natabhairavi", "Abhogi": "Kharaharapriya", "Suddha Saveri": "Dheerasankarabharanam", "Arabhi": "Dheerasankarabharanam", "Jaganmohini": "Mayamalavagowla", "Vasantha": "Mayamalavagowla", "Todi": "Hanumatodi", "Abheri": "Kharaharapriya", "Kapi": "Kharaharapriya", "Sri": "Kharaharapriya", "Nalinakanti": "Dheerasankarabharanam", "Saramati": "Natabhairavi", "Hamsanadam": "Neetimati", "Jayantasri": "Natabhairavi", "Natakurinji": "Harikambhoji", "Kanada": "Kharaharapriya", "Purnachandrika": "Dheerasankarabharanam", "Khamas": "Harikambhoji", "Sindhu Bhairavi": "Natabhairavi", "Lalitha": "Mayamalavagowla", "Varali": "Jhalavarali", "Gaanamoorthi": "Ganamurti", "Kathanakuthuhalam": "Dheerasankarabharanam", "Simhendramadhyamam": "Simhendramadhyamam", "Keeravani": "Keeravani", "Shanmukhapriya": "Shanmukhapriya", "Kamavardhini": "Kamavardhini"};
+        let melakarta = ["Kanakangi", "Ratnangi", "Ganamurti", "Vanaspati", "Manavati", "Tanarupi", "Senavati", "Hanumatodi", "Dhenuka", "Natakapriya", "Kokilapriya", "Rupavati", "Gayakapriya", "Vakulabharanam", "Mayamalavagowla", "Chakravakam", "Suryakantam", "Hatakambari", "Jhankaradhwani", "Natabhairavi", "Keeravani", "Kharaharapriya", "Gourimanohari", "Varunapriya", "Mararanjani", "Charukesi", "Sarasangi", "Harikambhoji", "Dheerasankarabharanam", "Naganandini", "Yagapriya", "Ragavardhini", "Gangeyabhushani", "Vagadhiswari", "Shulini", "Chalanata", "Salagam", "Jalarnavam", "Jhalavarali", "Navaneetam", "Pavani", "Raghupriya", "Gavambodhi", "Bhavapriya", "Shubhapantuvarali", "Shadvidhamargini", "Suvarnangi", "Divyamani", "Dhavalambari", "Namanarayani", "Kamavardhini", "Ramapriya", "Gamanashrama", "Viswambari", "Syamalangi", "Shanmukhapriya", "Simhendramadhyamam", "Hemavati", "Dharmavati", "Neetimati", "Kantamani", "Rishabhapriya", "Latangi", "Vachaspati", "Mechakalyani", "Chitrambari", "Sucharitra", "Jyotiswarupini", "Dhatuvardhani", "Nasikabhushani", "Kosalam", "Rasikapriya"];
+        let currentWarmup = "";
+
+        function generatePractice() {
+            const seed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,'')) + Math.random();
+            const main = songs[Math.floor(Math.random() * songs.length)];
+            
+            if (Math.random() > 0.5) {
+                currentWarmup = simMap[main.raga] || (melakarta.includes(main.raga) ? main.raga : "Mayamalavagowla");
+            } else {
+                currentWarmup = melakarta[Math.floor(Math.random() * melakarta.length)];
+            }
+
+            const data = rep[currentWarmup] || rep["Mayamalavagowla"];
+            document.getElementById('warmup').innerText = currentWarmup;
+            document.getElementById('geetham').innerText = data.geethams[Math.floor(Math.random() * data.geethams.length)] || "N/A";
+            document.getElementById('swarajathi').innerText = data.swarajathis[Math.floor(Math.random() * data.swarajathis.length)] || "N/A";
+            document.getElementById('varnam').innerText = data.varnams[Math.floor(Math.random() * data.varnams.length)] || "N/A";
+            document.getElementById('main').innerText = main.song_name + " (" + main.raga + ")";
+        }
+
+        function addSong() {
+            const cat = document.getElementById('add-cat').value;
+            const name = document.getElementById('add-name').value.trim();
+            const raga = document.getElementById('add-raga').value.trim();
+            if(!name || !raga) return alert("Missing fields");
+
+            if(cat === 'main') songs.push({song_name: name, raga: raga});
+            else {
+                if(!rep[currentWarmup]) rep[currentWarmup] = {geethams:[], swarajathis:[], varnams:[]};
+                rep[currentWarmup][cat].push(name);
+            }
+            alert("Added " + name);
+            generatePractice();
+        }
+
+        function removeSong() {
+            const target = document.getElementById('remove-name').value.trim().toLowerCase();
+            if(!target) return;
+            songs = songs.filter(s => s.song_name.toLowerCase() !== target);
+            for(let r in rep) {
+                rep[r].geethams = rep[r].geethams.filter(s => s.toLowerCase() !== target);
+                rep[r].swarajathis = rep[r].swarajathis.filter(s => s.toLowerCase() !== target);
+                rep[r].varnams = rep[r].varnams.filter(s => s.toLowerCase() !== target);
+            }
+            alert("Process completed for: " + target);
+            generatePractice();
+        }
+
+        generatePractice();
+    </script>
+</body>
+</html>
